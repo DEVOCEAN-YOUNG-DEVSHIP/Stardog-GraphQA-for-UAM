@@ -1,5 +1,0 @@
-openai
-streamlit
-rdflib
-langchain
-pystardog
