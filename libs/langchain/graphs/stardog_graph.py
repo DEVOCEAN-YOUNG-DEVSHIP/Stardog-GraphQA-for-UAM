@@ -1,10 +1,10 @@
 from typing import Any, Dict, List, Optional
 
-# from langchain.graphs.graph_document import GraphDocument
 from langchain.graphs.graph_store import GraphStore
 from langchain.utils import get_from_env
 
 # 임시
+# 추후 stardog 라이브러리를 이용하여 가져오도록 수정
 schema = """
 <tag:stardog:designer:UAM_DEVOCEAN:model:AREA> a <http://www.w3.org/2002/07/owl#Class> ;
   <http://www.w3.org/2000/01/rdf-schema#label> "AREA" .
@@ -51,14 +51,14 @@ schema = """
 <tag:stardog:designer:UAM_DEVOCEAN:model:availability> a <http://www.w3.org/2002/07/owl#DatatypeProperty> ;
   <http://www.w3.org/2000/01/rdf-schema#label> "availability" ;
   <https://schema.org/domainIncludes> <tag:stardog:designer:UAM_DEVOCEAN:model:AREA> ;
-  <https://schema.org/rangeIncludes> <http://www.w3.org/2001/XMLSchema#string> .
+  <https://schema.org/rangeIncludes> <http://www.w3.org/2001/XMLSchema#boolean> .
 <tag:stardog:designer:UAM_DEVOCEAN:model:num_of_avail_vertipad> a <http://www.w3.org/2002/07/owl#DatatypeProperty> ;
   <http://www.w3.org/2000/01/rdf-schema#label> "num_of_avail_vertipad" ;
   <https://schema.org/rangeIncludes> <http://www.w3.org/2001/XMLSchema#integer> .
 <tag:stardog:designer:UAM_DEVOCEAN:model:time> a <http://www.w3.org/2002/07/owl#DatatypeProperty> ;
   <http://www.w3.org/2000/01/rdf-schema#label> "time" ;
   <https://schema.org/domainIncludes> <tag:stardog:designer:UAM_DEVOCEAN:model:AREA>, <tag:stardog:designer:UAM_DEVOCEAN:model:TIME>, <tag:stardog:designer:UAM_DEVOCEAN:model:VERTIPAD>, <tag:stardog:designer:UAM_DEVOCEAN:model:VERTIPORT>, <tag:stardog:designer:UAM_DEVOCEAN:model:waypoint> ;
-  <https://schema.org/rangeIncludes> <http://www.w3.org/2001/XMLSchema#string> .
+  <https://schema.org/rangeIncludes> <http://www.w3.org/2001/XMLSchema#time> .
 <tag:stardog:designer:UAM_DEVOCEAN:model:uam_id> a <http://www.w3.org/2002/07/owl#DatatypeProperty> ;
   <http://www.w3.org/2000/01/rdf-schema#label> "uam_id" ;
   <https://schema.org/domainIncludes> <tag:stardog:designer:UAM_DEVOCEAN:model:UAM>, <tag:stardog:designer:UAM_DEVOCEAN:model:VERTIPAD>, <tag:stardog:designer:UAM_DEVOCEAN:model:waypoint> ;
@@ -135,62 +135,8 @@ class StardogGraph(GraphStore):
             return results
         except StardogException as e:
             raise ValueError(f"Generated Stardog Statement is not valid\n{e}")
-    # def query(self, query: str, params: dict = {}) -> List[Dict[str, Any]]:
-    #     """Query Neo4j database."""
-    #     from neo4j.exceptions import CypherSyntaxError
-
-    #     with self._driver.session(database=self._database) as session:
-    #         try:
-    #             data = session.run(query, params)
-    #             return [r.data() for r in data]
-    #         except CypherSyntaxError as e:
-    #             raise ValueError(f"Generated Cypher Statement is not valid\n{e}")
-        
-
-    #     self._driver = stardog.GraphDatabase.driver(url, auth=(username, password))
-    #     self._database = database
-    #     self.schema: str = ""
-    #     self.structured_schema: Dict[str, Any] = {}
-    #     # Verify connection
-    #     try:
-    #         self._driver.verify_connectivity()
-    #     except neo4j.exceptions.ServiceUnavailable:
-    #         raise ValueError(
-    #             "Could not connect to Neo4j database. "
-    #             "Please ensure that the url is correct"
-    #         )
-    #     except neo4j.exceptions.AuthError:
-    #         raise ValueError(
-    #             "Could not connect to Neo4j database. "
-    #             "Please ensure that the username and password are correct"
-    #         )
-    #     # Set schema
-    #     try:
-    #         self.refresh_schema()
-    #     except neo4j.exceptions.ClientError:
-    #         raise ValueError(
-    #             "Could not use APOC procedures. "
-    #             "Please ensure the APOC plugin is installed in Neo4j and that "
-    #             "'apoc.meta.data()' is allowed in Neo4j configuration "
-    #         )
 
     @property
     def get_schema(self) -> str:
         """Returns the schema of the Graph"""
         return self.schema
-
-    # @property
-    # def get_structured_schema(self) -> Dict[str, Any]:
-    #     """Returns the structured schema of the Graph"""
-    #     return self.structured_schema
-
-    # def query(self, query: str, params: dict = {}) -> List[Dict[str, Any]]:
-    #     """Query Neo4j database."""
-    #     from neo4j.exceptions import CypherSyntaxError
-
-    #     with self._driver.session(database=self._database) as session:
-    #         try:
-    #             data = session.run(query, params)
-    #             return [r.data() for r in data]
-    #         except CypherSyntaxError as e:
-    #             raise ValueError(f"Generated Cypher Statement is not valid\n{e}")
