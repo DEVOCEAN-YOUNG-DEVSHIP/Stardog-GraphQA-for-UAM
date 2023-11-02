@@ -4,3 +4,5 @@ lab
 __init__.cpython-*
 stardog.cpython-*
 stardog_graph.cpython-*
+__pycache__
+```

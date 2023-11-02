@@ -4,34 +4,85 @@ from typing import Any, Dict, List, Optional
 from langchain.graphs.graph_store import GraphStore
 from langchain.utils import get_from_env
 
-# node_properties_query = """
-# CALL apoc.meta.data()
-# YIELD label, other, elementType, type, property
-# WHERE NOT type = "RELATIONSHIP" AND elementType = "node"
-# WITH label AS nodeLabels, collect({property:property, type:type}) AS properties
-# RETURN {labels: nodeLabels, properties: properties} AS output
+# 임시
+schema = """
+<tag:stardog:designer:UAM_DEVOCEAN:model:AREA> a <http://www.w3.org/2002/07/owl#Class> ;
+  <http://www.w3.org/2000/01/rdf-schema#label> "AREA" .
+<tag:stardog:designer:UAM_DEVOCEAN:model:TIME> a <http://www.w3.org/2002/07/owl#Class> ;
+  <http://www.w3.org/2000/01/rdf-schema#label> "TIME" .
+<tag:stardog:designer:UAM_DEVOCEAN:model:UAM> a <http://www.w3.org/2002/07/owl#Class> ;
+  <http://www.w3.org/2000/01/rdf-schema#label> "UAM" .
+<tag:stardog:designer:UAM_DEVOCEAN:model:VERTIPAD> a <http://www.w3.org/2002/07/owl#Class> ;
+  <http://www.w3.org/2000/01/rdf-schema#label> "VERTIPAD" .
+<tag:stardog:designer:UAM_DEVOCEAN:model:VERTIPORT> a <http://www.w3.org/2002/07/owl#Class> ;
+  <http://www.w3.org/2000/01/rdf-schema#label> "VERTIPORT" .
+<tag:stardog:designer:UAM_DEVOCEAN:model:waypoint> a <http://www.w3.org/2002/07/owl#Class> ;
+  <http://www.w3.org/2000/01/rdf-schema#label> "WAYPOINT" .
 
-# """
+<tag:stardog:designer:UAM_DEVOCEAN:model:between> a <http://www.w3.org/2002/07/owl#ObjectProperty> ;
+  <http://www.w3.org/2000/01/rdf-schema#label> "between" ;
+  <https://schema.org/domainIncludes> <tag:stardog:designer:UAM_DEVOCEAN:model:waypoint> ;
+  <https://schema.org/rangeIncludes> <tag:stardog:designer:UAM_DEVOCEAN:model:VERTIPORT> .
+<tag:stardog:designer:UAM_DEVOCEAN:model:in> a <http://www.w3.org/2002/07/owl#ObjectProperty> ;
+  <http://www.w3.org/2000/01/rdf-schema#label> "in" ;
+  <https://schema.org/domainIncludes> <tag:stardog:designer:UAM_DEVOCEAN:model:VERTIPAD> ;
+  <https://schema.org/rangeIncludes> <tag:stardog:designer:UAM_DEVOCEAN:model:VERTIPORT> .
+<tag:stardog:designer:UAM_DEVOCEAN:model:in_area> a <http://www.w3.org/2002/07/owl#ObjectProperty> ;
+  <http://www.w3.org/2000/01/rdf-schema#label> "in area" ;
+  <https://schema.org/domainIncludes> <tag:stardog:designer:UAM_DEVOCEAN:model:VERTIPORT>, <tag:stardog:designer:UAM_DEVOCEAN:model:waypoint> ;
+  <https://schema.org/rangeIncludes> <tag:stardog:designer:UAM_DEVOCEAN:model:AREA> .
+<tag:stardog:designer:UAM_DEVOCEAN:model:on_time> a <http://www.w3.org/2002/07/owl#ObjectProperty> ;
+  <http://www.w3.org/2000/01/rdf-schema#label> "on time" ;
+  <https://schema.org/domainIncludes> <tag:stardog:designer:UAM_DEVOCEAN:model:AREA>, <tag:stardog:designer:UAM_DEVOCEAN:model:UAM>, <tag:stardog:designer:UAM_DEVOCEAN:model:VERTIPAD>, <tag:stardog:designer:UAM_DEVOCEAN:model:VERTIPORT>, <tag:stardog:designer:UAM_DEVOCEAN:model:waypoint> ;
+  <https://schema.org/rangeIncludes> <tag:stardog:designer:UAM_DEVOCEAN:model:TIME> .
+<tag:stardog:designer:UAM_DEVOCEAN:model:on_vertipad> a <http://www.w3.org/2002/07/owl#ObjectProperty> ;
+  <http://www.w3.org/2000/01/rdf-schema#label> "on vertipad" ;
+  <https://schema.org/domainIncludes> <tag:stardog:designer:UAM_DEVOCEAN:model:UAM> ;
+  <https://schema.org/rangeIncludes> <tag:stardog:designer:UAM_DEVOCEAN:model:VERTIPAD> .
+<tag:stardog:designer:UAM_DEVOCEAN:model:on_waypoint> a <http://www.w3.org/2002/07/owl#ObjectProperty> ;
+  <http://www.w3.org/2000/01/rdf-schema#label> "on waypoint" ;
+  <https://schema.org/domainIncludes> <tag:stardog:designer:UAM_DEVOCEAN:model:UAM> ;
+  <https://schema.org/rangeIncludes> <tag:stardog:designer:UAM_DEVOCEAN:model:waypoint> .
 
-# rel_properties_query = """
-# CALL apoc.meta.data()
-# YIELD label, other, elementType, type, property
-# WHERE NOT type = "RELATIONSHIP" AND elementType = "relationship"
-# WITH label AS nodeLabels, collect({property:property, type:type}) AS properties
-# RETURN {type: nodeLabels, properties: properties} AS output
-# """
-
-# rel_query = """
-# CALL apoc.meta.data()
-# YIELD label, other, elementType, type, property
-# WHERE type = "RELATIONSHIP" AND elementType = "node"
-# UNWIND other AS other_node
-# RETURN {start: label, type: property, end: toString(other_node)} AS output
-# """
+<tag:stardog:designer:UAM_DEVOCEAN:model:area_id> a <http://www.w3.org/2002/07/owl#DatatypeProperty> ;
+  <http://www.w3.org/2000/01/rdf-schema#label> "area_id" ;
+  <https://schema.org/domainIncludes> <tag:stardog:designer:UAM_DEVOCEAN:model:AREA>, <tag:stardog:designer:UAM_DEVOCEAN:model:VERTIPORT>, <tag:stardog:designer:UAM_DEVOCEAN:model:waypoint> ;
+  <https://schema.org/rangeIncludes> <http://www.w3.org/2001/XMLSchema#string> .
+<tag:stardog:designer:UAM_DEVOCEAN:model:availability> a <http://www.w3.org/2002/07/owl#DatatypeProperty> ;
+  <http://www.w3.org/2000/01/rdf-schema#label> "availability" ;
+  <https://schema.org/domainIncludes> <tag:stardog:designer:UAM_DEVOCEAN:model:AREA> ;
+  <https://schema.org/rangeIncludes> <http://www.w3.org/2001/XMLSchema#string> .
+<tag:stardog:designer:UAM_DEVOCEAN:model:num_of_avail_vertipad> a <http://www.w3.org/2002/07/owl#DatatypeProperty> ;
+  <http://www.w3.org/2000/01/rdf-schema#label> "num_of_avail_vertipad" ;
+  <https://schema.org/rangeIncludes> <http://www.w3.org/2001/XMLSchema#integer> .
+<tag:stardog:designer:UAM_DEVOCEAN:model:time> a <http://www.w3.org/2002/07/owl#DatatypeProperty> ;
+  <http://www.w3.org/2000/01/rdf-schema#label> "time" ;
+  <https://schema.org/domainIncludes> <tag:stardog:designer:UAM_DEVOCEAN:model:AREA>, <tag:stardog:designer:UAM_DEVOCEAN:model:TIME>, <tag:stardog:designer:UAM_DEVOCEAN:model:VERTIPAD>, <tag:stardog:designer:UAM_DEVOCEAN:model:VERTIPORT>, <tag:stardog:designer:UAM_DEVOCEAN:model:waypoint> ;
+  <https://schema.org/rangeIncludes> <http://www.w3.org/2001/XMLSchema#string> .
+<tag:stardog:designer:UAM_DEVOCEAN:model:uam_id> a <http://www.w3.org/2002/07/owl#DatatypeProperty> ;
+  <http://www.w3.org/2000/01/rdf-schema#label> "uam_id" ;
+  <https://schema.org/domainIncludes> <tag:stardog:designer:UAM_DEVOCEAN:model:UAM>, <tag:stardog:designer:UAM_DEVOCEAN:model:VERTIPAD>, <tag:stardog:designer:UAM_DEVOCEAN:model:waypoint> ;
+  <https://schema.org/rangeIncludes> <http://www.w3.org/2001/XMLSchema#string> .
+<tag:stardog:designer:UAM_DEVOCEAN:model:uam_type> a <http://www.w3.org/2002/07/owl#DatatypeProperty> ;
+  <http://www.w3.org/2000/01/rdf-schema#label> "uam_type" ;
+  <https://schema.org/rangeIncludes> <http://www.w3.org/2001/XMLSchema#string> .
+<tag:stardog:designer:UAM_DEVOCEAN:model:vertipad_id> a <http://www.w3.org/2002/07/owl#DatatypeProperty> ;
+  <http://www.w3.org/2000/01/rdf-schema#label> "vertipad_id" ;
+  <https://schema.org/domainIncludes> <tag:stardog:designer:UAM_DEVOCEAN:model:UAM>, <tag:stardog:designer:UAM_DEVOCEAN:model:VERTIPAD> ;
+  <https://schema.org/rangeIncludes> <http://www.w3.org/2001/XMLSchema#string> .
+<tag:stardog:designer:UAM_DEVOCEAN:model:vertiport_id> a <http://www.w3.org/2002/07/owl#DatatypeProperty> ;
+  <http://www.w3.org/2000/01/rdf-schema#label> "vertiport_id" ;
+  <https://schema.org/domainIncludes> <tag:stardog:designer:UAM_DEVOCEAN:model:UAM>, <tag:stardog:designer:UAM_DEVOCEAN:model:VERTIPAD>, <tag:stardog:designer:UAM_DEVOCEAN:model:VERTIPORT> ;
+  <https://schema.org/rangeIncludes> <http://www.w3.org/2001/XMLSchema#string> .
+<tag:stardog:designer:UAM_DEVOCEAN:model:waypoint_id> a <http://www.w3.org/2002/07/owl#DatatypeProperty> ;
+  <http://www.w3.org/2000/01/rdf-schema#label> "waypoint_id" ;
+  <https://schema.org/domainIncludes> <tag:stardog:designer:UAM_DEVOCEAN:model:UAM>, <tag:stardog:designer:UAM_DEVOCEAN:model:waypoint> ;
+  <https://schema.org/rangeIncludes> <http://www.w3.org/2001/XMLSchema#string> .
+"""
 
 
 class StardogGraph(GraphStore):
-    """Neo4j wrapper for graph operations.
+    """Stardog wrapper for graph operations.
 
     *Security note*: Make sure that the database connection uses credentials
         that are narrowly-scoped to only include necessary permissions.
@@ -74,6 +125,7 @@ class StardogGraph(GraphStore):
         
         # self._admin = stardog.Admin(**conn_details)
         self.conn = stardog.Connection(database, **conn_details)
+        self.schema = schema
         
     def query(self, sparql_query):
         """Query Stardog database."""
@@ -122,10 +174,10 @@ class StardogGraph(GraphStore):
     #             "'apoc.meta.data()' is allowed in Neo4j configuration "
     #         )
 
-    # @property
-    # def get_schema(self) -> str:
-    #     """Returns the schema of the Graph"""
-    #     return self.schema
+    @property
+    def get_schema(self) -> str:
+        """Returns the schema of the Graph"""
+        return self.schema
 
     # @property
     # def get_structured_schema(self) -> Dict[str, Any]:
