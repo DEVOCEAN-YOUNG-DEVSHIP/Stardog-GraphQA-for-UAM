@@ -7,17 +7,23 @@ from langchain.utils import get_from_env
 # 추후 stardog 라이브러리를 이용하여 가져오도록 수정
 schema = """
 <tag:stardog:designer:UAM_DEVOCEAN:model:AREA> a <http://www.w3.org/2002/07/owl#Class> ;
-  <http://www.w3.org/2000/01/rdf-schema#label> "AREA" .
+  <http://www.w3.org/2000/01/rdf-schema#label> "AREA" ;
+  <tag:stardog:designer:colorId> "sd-qb-green" .
 <tag:stardog:designer:UAM_DEVOCEAN:model:TIME> a <http://www.w3.org/2002/07/owl#Class> ;
-  <http://www.w3.org/2000/01/rdf-schema#label> "TIME" .
+  <http://www.w3.org/2000/01/rdf-schema#label> "TIME" ;
+  <tag:stardog:designer:colorId> "sd-qb-yellow-green" .
 <tag:stardog:designer:UAM_DEVOCEAN:model:UAM> a <http://www.w3.org/2002/07/owl#Class> ;
-  <http://www.w3.org/2000/01/rdf-schema#label> "UAM" .
+  <http://www.w3.org/2000/01/rdf-schema#label> "UAM" ;
+  <tag:stardog:designer:colorId> "sd-qb-red" .
 <tag:stardog:designer:UAM_DEVOCEAN:model:VERTIPAD> a <http://www.w3.org/2002/07/owl#Class> ;
-  <http://www.w3.org/2000/01/rdf-schema#label> "VERTIPAD" .
+  <http://www.w3.org/2000/01/rdf-schema#label> "VERTIPAD" ;
+  <tag:stardog:designer:colorId> "sd-qb-orange" .
 <tag:stardog:designer:UAM_DEVOCEAN:model:VERTIPORT> a <http://www.w3.org/2002/07/owl#Class> ;
-  <http://www.w3.org/2000/01/rdf-schema#label> "VERTIPORT" .
+  <http://www.w3.org/2000/01/rdf-schema#label> "VERTIPORT" ;
+  <tag:stardog:designer:colorId> "sd-qb-gold" .
 <tag:stardog:designer:UAM_DEVOCEAN:model:waypoint> a <http://www.w3.org/2002/07/owl#Class> ;
-  <http://www.w3.org/2000/01/rdf-schema#label> "WAYPOINT" .
+  <http://www.w3.org/2000/01/rdf-schema#label> "WAYPOINT" ;
+  <tag:stardog:designer:colorId> "sd-qb-light-orange" .
 
 <tag:stardog:designer:UAM_DEVOCEAN:model:between> a <http://www.w3.org/2002/07/owl#ObjectProperty> ;
   <http://www.w3.org/2000/01/rdf-schema#label> "between" ;
@@ -103,7 +109,7 @@ class StardogGraph(GraphStore):
         password: Optional[str] = None,
         database: Optional[str] = None,
     ) -> None:
-        """Create a new Neo4j graph wrapper instance."""
+        """Create a new Stardog graph wrapper instance."""
         try:
             import stardog
         except ImportError:
@@ -123,7 +129,6 @@ class StardogGraph(GraphStore):
             "password": password,
         }
         
-        # self._admin = stardog.Admin(**conn_details)
         self.conn = stardog.Connection(database, **conn_details)
         self.schema = schema
         
